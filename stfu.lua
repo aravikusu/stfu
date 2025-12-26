@@ -122,6 +122,49 @@ function remove_keyword_from_blacklist(...)
     end
 end
 
+function list_blacklist()
+    if settings.blacklist:empty() then
+        log('The STFU blacklist is currently empty.')
+    else
+        log('The currently blacklisted words in STFU are as follows:')
+        log(settings.blacklist:format('csv'))
+    end
+end
+
+function show_blisted()
+    if settings.blisted_db:empty() then
+        log('Blacklist is currently empty.')
+    else
+        log('STFU has blacklisted the following players:')
+        log(settings.blisted_db:format('csv'))
+    end
+end
+
+function pardon_player(player)
+    local p = (player or ''):lower()
+    if settings.blisted_db:contains(p) then
+        windower.send_command('input /blist remove '..player)
+        log('Pardoned '..player..' from blacklist!')
+        settings.blisted_db = settings.blisted_db - S{p}
+        config.save(settings)
+    else
+        log(player..' is not in the STFU blacklist database.')
+    end
+end
+
+function show_help()
+    log('-- STFU --')
+    log('STFU is an addon that automatically blacklists players who writes certain words.')
+    log("Its goal is to reduce headaches from RMT spam in /yell chat.")
+    log('')
+    log('-- STFU Commands --')
+    log('//stfu list - Lists all blacklisted words.')
+    log('//stfu add <word1> <word2> ... - Adds words to the blacklist.')
+    log('//stfu remove <word1> <word2> ... - Removes words from the blacklist.')
+    log('//stfu blisted - Shows all players blacklisted by STFU.')
+    log('//stfu pardon <playername> - Remove a player from the blacklist.')
+end
+
 windower.register_event('addon command', function(command, ...)
     command = command and command:lower() or 'help'
     local args = L{...}
@@ -137,22 +180,12 @@ windower.register_event('addon command', function(command, ...)
         end)
         remove_keyword_from_blacklist(words:unpack())
     elseif list_aliases:contains(command) then
-        if settings.blacklist:empty() then
-            log('The STFU blacklist is currently empty.')
-        else
-            log('The currently blacklisted words in STFU are as follows:')
-            log(settings.blacklist:format('csv'))
-        end
+        list_blacklist()
     elseif help_aliases:contains(command) then
-        log('-- STFU --')
-        log('STFU is an addon that automatically blacklists players who writes certain words.')
-        log("Its goal is to reduce headaches from RMT spam in /yell chat.")
-        log('')
-        log('-- STFU Commands --')
-        log('//stfu list - Lists all blacklisted words.')
-        log('//stfu add <word1> <word2> ... - Adds words to the blacklist.')
-        log('//stfu remove <word1> <word2> ... - Removes words from the blacklist.')
+        show_help()
+    elseif command == 'pardon' then
+        pardon_player(args:unpack())
+    elseif command == "blisted" then
+        show_blisted()
     end
-
-    config.save(settings)
 end)
