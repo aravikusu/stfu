@@ -8,3 +8,5 @@ Commands STFU supports:
 - `remove`/`r`/`rm [WORDS]` - remove a word (or multiple) from the blacklist.
 - `list`/`l`/`ls` - list every word that you've added to the blacklist.
 - `help`/`h` - general info and command list.
+- `blisted` - shows every player STFU has blacklisted
+- `pardon [PLAYER]` - remove a player from the STFU blacklist
